@@ -4,8 +4,8 @@ defmodule Discuss.TopicController do
   alias Discuss.Topic
 
   def index(conn, _params) do
-
-  #todo!!
+    topics = Repo.all(Topic)
+    render conn, "index.html", topics: topics
   end
 
   def new(conn, _params) do
@@ -17,9 +17,14 @@ defmodule Discuss.TopicController do
     changeset = Topic.changeset(%Topic{}, topic)
 
     case Repo.insert(changeset) do
-      {:ok, post} -> IO.inspect(post, label: "completed")
+      {:ok, post} ->
+        conn
+        |> put_flash(:info, "Topic Created")
+        |> redirect(to: topic_path(conn, :index))
       {:error, changeset} ->
-        render conn, "new.html", changeset: changeset
+        conn
+        |> put_flash(:error, "failed to create empty topic")
+        |> redirect(to: topic_path(conn, :index))
     end
 
   end
