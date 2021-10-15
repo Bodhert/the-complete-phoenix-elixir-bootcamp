@@ -5,6 +5,8 @@ defmodule Discuss.User do
     field :email, :string
     field :provider, :string
     field :token, :string
+
+    timestamps()
   end
 
   def changeset(struct, params \\ %{}) do
