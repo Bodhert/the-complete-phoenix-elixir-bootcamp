@@ -25,7 +25,8 @@
 		"jakebecker.elixir-ls",
 		"mtxr.sqltools",
 		"mtxr.sqltools-driver-pg",
-		"ms-azuretools.vscode-docker"
+		"ms-azuretools.vscode-docker",
+		"sleistner.vscode-fileutils"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
