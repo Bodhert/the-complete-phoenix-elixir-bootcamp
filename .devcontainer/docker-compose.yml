@@ -7,12 +7,12 @@ services:
       dockerfile: Dockerfile
       args:
         # Elixir Version: 1.9, 1.10, 1.10.4, ...
-        VARIANT: "1.6"
+        VARIANT: "1.12.3"
         # Phoenix Version: 1.4.17, 1.5.4, ...
-        # PHOENIX_VERSION: "1.4.17"
+        PHOENIX_VERSION: "1.6.2"
         # Node Version: 10, 11, ...
         INSTALL_NODE: "true"
-        NODE_VERSION: "6"
+        NODE_VERSION: "14"
 
     volumes:
       - ..:/workspace:cached

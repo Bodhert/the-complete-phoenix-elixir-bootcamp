@@ -11,24 +11,24 @@ ARG USER_GID=$USER_UID
 # Options for common package install script
 ARG INSTALL_ZSH="true"
 ARG UPGRADE_PACKAGES="true"
-ARG COMMON_SCRIPT_SOURCE="https://raw.githubusercontent.com/microsoft/vscode-dev-containers/v0.187.0/script-library/common-debian.sh"
-ARG COMMON_SCRIPT_SHA="de24524ea48668b2f2f02bb684f103af92e6b336acb1bb17ff01db7a3c757022"
+ARG COMMON_SCRIPT_SOURCE="https://raw.githubusercontent.com/microsoft/vscode-dev-containers/v0.194.3/script-library/common-debian.sh"
+ARG COMMON_SCRIPT_SHA="f8e0ac9fe35a29ae3634c9f7a447ea081b99e3d9ff211639e9b69801133ae4d8"
 
 # Optional Settings for Phoenix
-# ARG PHOENIX_VERSION="1.4.17"
+ARG PHOENIX_VERSION="1.6"
 
-# [Optional] Settings for installing Node.js.
-ARG INSTALL_NODE="true"
 ARG NODE_SCRIPT_SOURCE="https://raw.githubusercontent.com/microsoft/vscode-dev-containers/main/script-library/node-debian.sh"
 ARG NODE_SCRIPT_SHA="dev-mode"
-ARG NODE_VERSION="lts/*"
+ARG NODE_VERSION="none"
 ENV NVM_DIR=/usr/local/share/nvm
 ENV NVM_SYMLINK_CURRENT=true
 ENV PATH=${NVM_DIR}/current/bin:${PATH}
 
+# [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
+ARG NODE_VERSION="lts/*"
+
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
 RUN apt-get update \
-  && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
   && export DEBIAN_FRONTEND=noninteractive \
   && apt-get -y install --no-install-recommends curl ca-certificates 2>&1 \
   && curl -sSL ${COMMON_SCRIPT_SOURCE} -o /tmp/common-setup.sh \
@@ -36,7 +36,7 @@ RUN apt-get update \
   && /bin/bash /tmp/common-setup.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" \
   #
   # [Optional] Install Node.js for use with web applications
-  && if [ "$INSTALL_NODE" = "true" ]; then \
+  && if [ "$NODE_VERSION" != "none" ]; then \
   curl -sSL ${NODE_SCRIPT_SOURCE} -o /tmp/node-setup.sh \
   && ([ "${NODE_SCRIPT_SHA}" = "dev-mode" ] || (echo "${COMMON_SCRIPT_SHA} */tmp/node-setup.sh" | sha256sum -c -)) \
   && /bin/bash /tmp/node-setup.sh "${NVM_DIR}" "${NODE_VERSION}" "${USERNAME}"; \
@@ -51,12 +51,9 @@ RUN apt-get update \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/* /tmp/common-setup.sh /tmp/node-setup.sh
 
-RUN wget https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez -P /tmp
-
 RUN su ${USERNAME} -c "mix local.hex --force \
   && mix local.rebar --force \
-  && mix archive.install --force /tmp/phoenix_new.ez"
-
+  && mix archive.install --force hex phx_new ${PHOENIX_VERSION}"
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update \
