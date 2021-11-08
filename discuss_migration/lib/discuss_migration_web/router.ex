@@ -19,6 +19,7 @@ defmodule DiscussMigrationWeb.Router do
 
     get "/", PageController, :index
     resources "/topics", TopicController
+    resources "/products", ProductController
   end
 
   # Other scopes may use custom stacks.
