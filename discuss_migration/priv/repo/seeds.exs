@@ -1,3 +1,6 @@
+for title <- ["Home Improvement", "Power Tools", "Gardening", "Books"] do
+  {:ok, _} = DiscussMigration.Catalog.create_category(%{title: title})
+end
 # Script for populating the database. You can run it as:
 #
 #     mix run priv/repo/seeds.exs

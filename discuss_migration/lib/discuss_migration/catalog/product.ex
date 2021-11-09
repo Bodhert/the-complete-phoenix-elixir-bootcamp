@@ -3,10 +3,11 @@ defmodule DiscussMigration.Catalog.Product do
   import Ecto.Changeset
 
   schema "products" do
-    field :description, :string
-    field :price, :decimal
-    field :title, :string
-    field :views, :integer
+    field(:description, :string)
+    field(:price, :decimal)
+    field(:title, :string)
+    field(:views, :integer)
+    many_to_many(:categories, Category, join_through: "product_categories", on_replace: :delete)
 
     timestamps()
   end
