@@ -7,6 +7,7 @@ defmodule DiscussMigration.Catalog do
   alias DiscussMigration.Repo
 
   alias DiscussMigration.Catalog.Product
+  alias DiscussMigration.Catalog.Category
 
   @doc """
   Returns the list of products.
@@ -73,7 +74,6 @@ defmodule DiscussMigration.Catalog do
   """
   def update_product(%Product{} = product, attrs) do
     product
-    |> Product.changeset(attrs)
     |> change_product(attrs)
     |> Repo.update()
   end

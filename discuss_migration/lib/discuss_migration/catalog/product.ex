@@ -2,6 +2,9 @@ defmodule DiscussMigration.Catalog.Product do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias DiscussMigration.Catalog.Category
+
+
   schema "products" do
     field(:description, :string)
     field(:price, :decimal)
