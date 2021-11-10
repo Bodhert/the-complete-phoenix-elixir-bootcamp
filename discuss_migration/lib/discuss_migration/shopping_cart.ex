@@ -6,7 +6,7 @@ defmodule DiscussMigration.ShoppingCart do
   import Ecto.Query, warn: false
   alias DiscussMigration.Repo
   alias DiscussMigration.Catalog
-  alias DiscussMigration.ShoppingCart.{Cart,CartItem}
+  alias DiscussMigration.ShoppingCart.{Cart, CartItem}
 
   def get_cart_by_user_uuid(user_uuid) do
     Repo.one(
@@ -19,7 +19,6 @@ defmodule DiscussMigration.ShoppingCart do
       )
     )
   end
-
 
   @doc """
   Returns the list of carts.
@@ -74,7 +73,7 @@ defmodule DiscussMigration.ShoppingCart do
 
   defp reload_cart(%Cart{} = cart), do: get_cart_by_user_uuid(cart.user_uuid)
 
-  def add_item_to_cart(%Cart{} = cart, %Catalog.Product{} = product)  do
+  def add_item_to_cart(%Cart{} = cart, %Catalog.Product{} = product) do
     %CartItem{quantity: 1, price_when_carted: product.price}
     |> CartItem.changeset(%{})
     |> Ecto.Changeset.put_assoc(:cart, cart)
@@ -86,7 +85,7 @@ defmodule DiscussMigration.ShoppingCart do
   end
 
   def remove_item_from_cart(%Cart{} = cart, product_id) do
-    {1,_} =
+    {1, _} =
       Repo.delete_all(
         from(i in CartItem,
           where: i.cart_id == ^cart.id,
@@ -94,10 +93,8 @@ defmodule DiscussMigration.ShoppingCart do
         )
       )
 
-      {:ok, reload_cart(cart)}
+    {:ok, reload_cart(cart)}
   end
-
-
 
   @doc """
   Updates a cart.
@@ -112,9 +109,21 @@ defmodule DiscussMigration.ShoppingCart do
 
   """
   def update_cart(%Cart{} = cart, attrs) do
-    cart
-    |> Cart.changeset(attrs)
-    |> Repo.update()
+    changeset =
+      cart
+      |> Cart.changeset(attrs)
+      |> Ecto.Changeset.cast_assoc(:items, with: &CartItem.changeset/2)
+
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:cart, changeset)
+      |> Ecto.Multi.delete_all(:discarded_items, fn %{ cart: cart } ->
+          from(i in CartItem, where: i.cart_id == ^cart.id and i.quantity == 0)
+      end)
+      |> Repo.transaction()
+      |> case do
+        {:ok, %{cart: cart}} -> {:ok, cart}
+        {:error, :cart, chageset, _changes_so_far} -> {:error, changeset}
+      end
   end
 
   @doc """
@@ -240,5 +249,17 @@ defmodule DiscussMigration.ShoppingCart do
   """
   def change_cart_item(%CartItem{} = cart_item, attrs \\ %{}) do
     CartItem.changeset(cart_item, attrs)
+  end
+
+  def total_item_price(%CartItem{} = item) do
+    Decimal.mult(item.product.price, item.quantity)
+  end
+
+  def total_cart_price(%Cart{} = cart) do
+    Enum.reduce(cart.items, 0, fn item, acc ->
+      item
+      |> total_item_price()
+      |> Decimal.add(acc)
+    end)
   end
 end
