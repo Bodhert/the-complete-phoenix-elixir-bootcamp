@@ -47,6 +47,7 @@ defmodule DiscussMigrationWeb.Router do
     resources "/products", ProductController
 
     resources "/cart_items", CartItemController, only: [:create, :delete]
+    resources "/orders", OrderController, only: [:create, :show]
 
     get "/cart", CartController, :show
     put "/cart", CartController, :update

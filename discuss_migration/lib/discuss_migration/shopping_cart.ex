@@ -122,7 +122,7 @@ defmodule DiscussMigration.ShoppingCart do
       |> Repo.transaction()
       |> case do
         {:ok, %{cart: cart}} -> {:ok, cart}
-        {:error, :cart, chageset, _changes_so_far} -> {:error, changeset}
+        {:error, :cart, changeset, _changes_so_far} -> {:error, changeset}
       end
   end
 
@@ -262,4 +262,10 @@ defmodule DiscussMigration.ShoppingCart do
       |> Decimal.add(acc)
     end)
   end
+
+  def prune_cart_items(%Cart{} = cart) do
+    {_,_} = Repo.delete_all(from(i in CartItem, where: i.cart_id == ^cart.id))
+    {:ok, reload_cart(cart)}
+  end
+
 end
