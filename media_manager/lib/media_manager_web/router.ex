@@ -17,7 +17,7 @@ defmodule MediaManagerWeb.Router do
   scope "/", MediaManagerWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    resources "/", TopicController
   end
 
   # Other scopes may use custom stacks.
